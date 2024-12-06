@@ -1,8 +1,8 @@
 from fastapi import APIRouter
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import StreamingResponse
 
 from llm.main import create_essay_chain
-from model import ApiResponse
+from api.type import ApiResponse
 
 
 router = APIRouter(tags=["llm"])
