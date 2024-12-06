@@ -1,0 +1,15 @@
+[project]
+name = "llm-backend"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.115.6",
+    "langchain-openai>=0.2.11",
+    "langchain>=0.3.9",
+    "pydantic-settings",
+    "uvicorn>=0.32.1",
+    "sqlmodel>=0.0.22",
+    "psycopg[binary]>=3.2.3",
+]
