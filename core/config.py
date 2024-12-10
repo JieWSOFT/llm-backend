@@ -1,7 +1,10 @@
+import secrets
 from typing import Annotated, Any
 from pydantic import AnyUrl, BeforeValidator, PostgresDsn, computed_field
 from pydantic_core import MultiHostUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
+import os
+import time
 
 
 def parse_cors(v: Any) -> list[str] | str:
@@ -22,14 +25,18 @@ class Settings(BaseSettings):
     )
     # 项目
     PROJECT_NAME: str
-    
+    SECRET_KEY: str = secrets.token_urlsafe(32)
+    LOG_DIR: str = os.path.join(
+        os.getcwd(), f'log\{time.strftime("%Y-%m-%d")}.log'
+    )
+    # 60 minutes * 24 hours * 8 days = 8 days
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
     # LLM
     API_URL: str = ""
 
     # uvicorn
     SEVER_HOST: str = "127.0.0.1"
     SEVER_PORT: int = 3333
-    
 
     # 路由跨域
     API_V1_STR: str = "/api/v1"
@@ -44,15 +51,18 @@ class Settings(BaseSettings):
         return [str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS] + [
             self.FRONTEND_HOST
         ]
-    
+
     # 数据库
     POSTGRES_SERVER: str
     POSTGRES_PORT: int = 5432
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str = ""
     POSTGRES_DB: str = ""
-    
-    
+
+    # 微信
+    WX_APP_ID: str
+    WX_APP_SECRET: str
+
     @computed_field  # type: ignore[prop-decorator]
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:

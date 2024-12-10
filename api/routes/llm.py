@@ -1,18 +1,19 @@
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 
+from api.deps import CurrentUser
 from llm.main import create_essay_chain
 from api.type import ApiResponse
 
 
-router = APIRouter(tags=["llm"])
+router = APIRouter(tags=["llm"], prefix="/llm")
 # 作文
 essaychain = create_essay_chain()
 
 
 # 流式生成作文 (HTTP)
 @router.get("/streaming")
-def streaming_endpoint(topic: str, length: int = 500):
+def streaming_endpoint(current_user: CurrentUser, topic: str, length: int = 500):
     # 异步生成器
     async def generate():
         async for chunk in essaychain.astream({"topic": topic, "length": length}):
@@ -24,6 +25,7 @@ def streaming_endpoint(topic: str, length: int = 500):
 # 一次性生成作文 (HTTP)
 @router.get("/generate", response_model=ApiResponse[str])
 async def generate_once(
+    current_user: CurrentUser,
     topic: str,
     length: int = 500,
 ):
