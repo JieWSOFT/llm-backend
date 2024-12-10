@@ -1,4 +1,0 @@
-2024-12-10 16:37:00.455 | DEBUG    | main:init_app:45 - 日志系统已加载
-2024-12-10 16:38:22.838 | DEBUG    | main:init_app:45 - 日志系统已加载
-2024-12-10 16:38:49.660 | INFO     | api.routes.wx:wxLogin:20 - 我被访问啦！！！
-2024-12-10 16:38:50.092 | INFO     | uvicorn.protocols.http.h11_impl:send:473 - 127.0.0.1:12741 - "POST /api/v1/wx/login HTTP/1.1" 200
