@@ -42,7 +42,7 @@ def init_app():
         handlers=[{"sink": sys.stdout, "level": logging.DEBUG, "format": format_record}]
     )
     logger.add(settings.LOG_DIR, encoding="utf-8", rotation="9:46")
-    logger.debug("日志系统已加载")
+    logging.getLogger("uvicorn").handlers = [InterceptHandler()]
     logging.getLogger("uvicorn.access").handlers = [InterceptHandler()]
     return app
 
