@@ -7,5 +7,6 @@ if __name__ == "__main__":
         app="main:app",
         host=settings.SEVER_HOST,
         port=settings.SEVER_PORT,
+        workers=4,
         reload=True,
     )
