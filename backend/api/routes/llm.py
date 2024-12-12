@@ -28,7 +28,13 @@ async def generate_once(
     current_user: CurrentUser,
     topic: str,
     length: int = 500,
-):
+)->ApiResponse[str]:
     # 生成完整内容
     result = await essaychain.ainvoke({"topic": topic, "length": length})
     return ApiResponse(code=200, data=result.content)
+
+
+# 获取llm服务可用次数
+@router.get("/llmAvailable")
+def get_llm_available(current_user: CurrentUser)->ApiResponse[int]:
+    return ApiResponse(data=current_user.llm_avaiable)

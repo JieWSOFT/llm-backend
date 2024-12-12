@@ -12,7 +12,7 @@ services:
     volumes:
       - app-db-data:/var/lib/postgresql/data/pgdata
     env_file:
-      - .env
+      - backend/.env
     environment:
       - PGDATA=/var/lib/postgresql/data/pgdata
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
@@ -22,8 +22,10 @@ services:
   prestart:
     # image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
     build:
-      context: ./
+      context: ./backend
     network_mode: host
+    env_file:
+      - backend/.env
     depends_on:
       db:
         condition: service_healthy
@@ -32,7 +34,9 @@ services:
   backend:
     # image: '${DOCKER_IMAGE_BACKEND?Variable not set}:${TAG-latest}'
     build:
-      context: ./
+      context: ./backend
+    env_file:
+      - backend/.env
     restart: always
     network_mode: host
     depends_on:
@@ -41,5 +45,7 @@ services:
         restart: true
       prestart:
         condition: service_completed_successfully
+    environment:
+      ENVIRONMENT: production
 volumes:
   app-db-data:

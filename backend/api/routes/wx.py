@@ -31,7 +31,7 @@ def wxLogin(
     session_user = session.exec(statement).first()
     if not session_user:
         logger.info(f'微信登录鉴权----pendding----用户不存在 创建用户----code: {code}')
-        user = SysUser(id=openId, username=str(uuid.uuid4())[:8])
+        user = SysUser(id=openId, username=str(uuid.uuid4())[:10])
         session.add(user)
         session.commit()
         session.refresh(user)

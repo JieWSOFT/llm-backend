@@ -1,4 +1,4 @@
-from sqlmodel import Session, create_engine, select
+from sqlmodel import create_engine, select
 from core.config import settings
 
 

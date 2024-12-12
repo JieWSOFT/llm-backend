@@ -19,24 +19,23 @@ def parse_cors(v: Any) -> list[str] | str:
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file="./.env",
+        env_file =  ".env",
         env_ignore_empty=True,
         extra="ignore",
     )
     # 项目
+    ENVIRONMENT: str
     PROJECT_NAME: str
     SECRET_KEY: str = secrets.token_urlsafe(32)
-    LOG_DIR: str = os.path.join(
-        os.getcwd(), f'log/{time.strftime("%Y-%m-%d")}.log'
-    )
+    LOG_DIR: str = os.path.join(os.getcwd(), f'log/{time.strftime("%Y-%m-%d")}.log')
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
     # LLM
     API_URL: str = ""
 
     # uvicorn
-    SEVER_HOST: str = "127.0.0.1"
-    SEVER_PORT: int = 3333
+    SEVER_HOST: str = "0.0.0.0"
+    SEVER_PORT: int = 3332
 
     # 路由跨域
     API_V1_STR: str = "/api/v1"
@@ -74,6 +73,5 @@ class Settings(BaseSettings):
             port=self.POSTGRES_PORT,
             path=self.POSTGRES_DB,
         )
-
 
 settings = Settings()

@@ -6,5 +6,5 @@ T = TypeVar("T")
 
 class ApiResponse(BaseModel,Generic[T]):
     message: Optional[str] = None
-    code: int
+    code: int = 200
     data: T
