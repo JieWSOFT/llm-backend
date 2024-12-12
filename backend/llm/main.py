@@ -1,11 +1,12 @@
 from langchain.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
-
+from loguru import logger
+from core.config import settings
 # 初始化 LangChain 的 ChatOpenAI 模型
 chat_llm = ChatOpenAI(
-    model="qwen2:7b",
-    base_url="http://localhost:11434/v1/",
-    api_key="Ollama",
+    model= settings.MODEL,
+    base_url= settings.BASE_URL,
+    api_key= settings.API_KEY,
 )
 
 
@@ -22,4 +23,5 @@ def create_essay_chain():
         现在请以 {topic} 为题 写一篇{length}字的作文。字数不能多太多也不能少""",
     )
     chain = template | chat_llm
+    logger.info(f'当前使用的LLM模型为  MODEL={settings.MODEL}  BASE_URL={settings.BASE_URL}')
     return chain

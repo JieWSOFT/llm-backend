@@ -46,6 +46,9 @@ services:
       prestart:
         condition: service_completed_successfully
     environment:
-      ENVIRONMENT: production
+      ENVIRONMENT: production,
+      BASE_URL: ${BASE_URL?Variable not set}
+      MODEL: ${MODEL?Variable not set}
+      API_KEY: ${API_KEY?Variable not set}
 volumes:
   app-db-data:

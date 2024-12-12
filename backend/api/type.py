@@ -7,4 +7,4 @@ T = TypeVar("T")
 class ApiResponse(BaseModel,Generic[T]):
     message: Optional[str] = None
     code: int = 200
-    data: T
+    data: Optional[T]
