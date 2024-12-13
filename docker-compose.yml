@@ -37,6 +37,8 @@ services:
       context: ./backend
     restart: always
     network_mode: host
+    volumes:
+      - app-db-data/backend/log:/backend/log
     depends_on:
       db:
         condition: service_healthy
