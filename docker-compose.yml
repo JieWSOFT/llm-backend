@@ -38,7 +38,7 @@ services:
     restart: always
     network_mode: host
     volumes:
-      - app-db-data/backend/log:/backend/log
+      - bakend-logs:/backend/log
     depends_on:
       db:
         condition: service_healthy
@@ -54,3 +54,4 @@ services:
       API_KEY: ${API_KEY?Variable not set}
 volumes:
   app-db-data:
+  bakend-logs:
