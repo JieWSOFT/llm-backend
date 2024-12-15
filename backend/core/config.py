@@ -17,8 +17,7 @@ def parse_cors(v: Any) -> list[str] | str:
     raise ValueError(v)
 
 
-sk = secrets.token_urlsafe(32)
-
+sk = "asdkasldqhiwe--12312k---0sadnsjkn asa."
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file =  "../.env",
