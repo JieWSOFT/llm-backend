@@ -51,7 +51,7 @@ def wxLogin(
 @router.get("getUserInfo", summary="获取微信用户信息")
 def wxUserInfo(
     current_user: CurrentUser,
-):
+)->ApiResponse:
     current_user.id = None
     return ApiResponse(code=200, data=current_user)
 
@@ -60,7 +60,7 @@ def wxUserInfo(
 def wxShareAddAvailableCounts(
     current_user: CurrentUser,
     session: SessionDep,
-):
+)->ApiResponse:
     statement = select(UserAction).where(current_user.id)
     sessionAction = session.exec(statement).first()
     if not sessionAction.shareCount:
