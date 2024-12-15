@@ -17,6 +17,8 @@ def parse_cors(v: Any) -> list[str] | str:
     raise ValueError(v)
 
 
+sk = secrets.token_urlsafe(32)
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file =  "../.env",
@@ -26,7 +28,7 @@ class Settings(BaseSettings):
     # 项目
     ENVIRONMENT: str
     PROJECT_NAME: str
-    SECRET_KEY: str = secrets.token_urlsafe(32)
+    SECRET_KEY: str = sk
     LOG_DIR: str = os.path.join(os.getcwd(), f'log/{time.strftime("%Y-%m-%d")}.log')
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
