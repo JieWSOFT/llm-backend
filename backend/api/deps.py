@@ -33,7 +33,7 @@ def get_current_user(session: SessionDep, token: TokenDep) -> SysUser:
         )
         token_data = TokenPayload(**payload)
     except (InvalidTokenError, ValidationError):
-        logger.error(f"登录验证失败,未获取到登录状态。 token: {token}  secret: { settings.SECRET_KEY}")
+        logger.error(f"登录验证失败,未获取到登录状态。 token: {token}  secret: { settings.SECRET_KEY}   {security.ALGORITHM}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
