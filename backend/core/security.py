@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import jwt
+from loguru import logger
 from passlib.context import CryptContext
 
 from core.config import settings
