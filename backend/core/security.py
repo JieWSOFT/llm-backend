@@ -19,7 +19,6 @@ def create_access_token(subject:  str | Any, expires_delta: int = None) -> str:
         expires_delta = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     
     to_encode = {"exp": expires_delta, "sub": str(subject)}
-    logger.error(f"生成token: secret: { settings.SECRET_KEY}    {ALGORITHM}")
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, ALGORITHM)
     return encoded_jwt
 
