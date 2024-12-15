@@ -12,7 +12,7 @@ essaychain = create_essay_chain()
 
 
 # 流式生成作文 (HTTP)
-@router.get("/streaming")
+@router.get("/essay/streaming",summary='流式调用生成作文')
 def streaming_endpoint(current_user: CurrentLLMUser, topic: str, length: int = 500):
     # 异步生成器
     async def generate():
@@ -23,7 +23,7 @@ def streaming_endpoint(current_user: CurrentLLMUser, topic: str, length: int = 5
 
 
 # 一次性生成作文 (HTTP)
-@router.get("/generate", response_model=ApiResponse[str])
+@router.get("/essay/generate", response_model=ApiResponse[str],summary="直接生成作文")
 async def generate_once(
     current_user: CurrentLLMUser,
     topic: str,
@@ -35,13 +35,13 @@ async def generate_once(
 
 
 # 获取llm服务可用次数
-@router.get("/llmAvailable")
+@router.get("/llmAvailable",summary="获取可用的llm服务可用次数")
 def get_llm_available(current_user: CurrentUser) -> ApiResponse[int]:
     return ApiResponse(data=current_user.llm_avaiable)
 
 
 # 增加llm服务可用次数
-@router.post("/llm")
+@router.post("/llmAvailable",summary="增加LLM的可调用次数")
 def add_llm_available_num(
     session: SessionDep,
     current_user: CurrentUser,

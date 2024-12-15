@@ -2,7 +2,7 @@ from fastapi import APIRouter, Body, HTTPException
 from loguru import logger
 import requests
 from sqlmodel import select
-from api.deps import SessionDep
+from api.deps import SessionDep, CurrentUser
 from api.type import ApiResponse
 from core.config import settings
 from core.security import create_access_token
@@ -12,7 +12,7 @@ from model import SysUser
 
 router = APIRouter(tags=["wx"], prefix="/wx")
 
-@router.post("/login")
+@router.post("/login",summary='微信code登录')
 def wxLogin(
     session: SessionDep,
     code: str = Body(1, title="微信code", embed=True),
@@ -39,3 +39,11 @@ def wxLogin(
         logger.info(f'微信登录鉴权----pendding----用户存在----code: {code}')
     logger.info(f'微信登录鉴权----end----code: {code}')
     return ApiResponse(code=200, data=token)
+
+
+@router.get('getUserInfo',summary='获取微信用户信息')
+def wxUserInfo(
+    current_user: CurrentUser,
+):
+    current_user.id = None
+    return ApiResponse(code=200,data=current_user)
