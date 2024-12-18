@@ -3,7 +3,7 @@ import sys
 from fastapi.routing import APIRoute
 from sqlmodel import Session, select
 from api.routes.llm import setTemplates
-from backend.model import LLMTemplate
+from model import LLMTemplate
 from core.db import engine
 from core.config import settings
 from fastapi import FastAPI

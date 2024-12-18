@@ -3,7 +3,7 @@ from fastapi import APIRouter, Body
 from fastapi.responses import StreamingResponse
 from loguru import logger
 from api.deps import CurrentLLMUser, CurrentUser, SessionDep
-from backend.model import LLMTemplate
+from model import LLMTemplate
 from llm.main import create_chain
 from api.type import ApiResponse, LLMRequestBody
 
