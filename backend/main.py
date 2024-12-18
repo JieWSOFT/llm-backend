@@ -1,8 +1,12 @@
+from contextlib import asynccontextmanager
 import sys
 from fastapi.routing import APIRoute
-from api.deps import SessionDep, TokenDep, get_current_user
+from sqlmodel import Session, select
+from backend.api.routes.llm import setTemplates
+from backend.model import LLMTemplate
+from core.db import engine
 from core.config import settings
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from api.main import api_router
 from loguru import logger
@@ -15,9 +19,22 @@ def custom_generate_unique_id(route: APIRoute) -> str:
     return f"{route.tags[0]}-{route.name}"
 
 
+# 初始化模板
+@asynccontextmanager
+async def lifespanself(app: FastAPI):
+    # 启动前 查询模板
+    with Session(engine) as session:
+        statement = select(LLMTemplate)
+        templates = session.exec(statement).all()
+        setTemplates(templates)
+    yield
+    # 结束停止的时候
+
+
 def init_app():
     # 初始化 FastAPI 应用
     app = FastAPI(
+        lifespan=lifespanself,
         title=settings.PROJECT_NAME,
         openapi_url=f"{settings.API_V1_STR}/openapi.json",
         generate_unique_id_function=custom_generate_unique_id,
@@ -45,5 +62,6 @@ def init_app():
     logging.getLogger("uvicorn").handlers = [InterceptHandler()]
     logging.getLogger("uvicorn.access").handlers = [InterceptHandler()]
     return app
+
 
 app = init_app()

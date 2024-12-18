@@ -17,7 +17,13 @@ class UserAction(SQLModel, table=True):
     id: str = Field(primary_key=True)
     username: str | None = Field(default=None, max_length=255)
     shareCount: Optional[int] = Field(default=None)
-
+    
+class logs(SQLModel, table=True):
+    __table_args__ = {"extend_existing": True}
+    id: str = Field(primary_key=True)
+    createTime: Optional[datetime] = Field(default=datetime.now(timezone.utc))
+    content: str = Field(sa_column=Column(TEXT))
+    
 class UserCreateHistory(SQLModel, table=True):
     __table_args__ = {"extend_existing": True}
     id: str = Field(primary_key=True)
@@ -29,7 +35,7 @@ class LLMTemplate(SQLModel, table=True):
     __table_args__ = {"extend_existing": True}
     id: Optional[int] = Field(default=None, primary_key=True)
     type: str
-    template: str = Field(sa_column=Column(TEXT))
+    template: str = Field(sa_column=Column(TEXT)),
     
 class TokenPayload(SQLModel):
     sub: str | None = None

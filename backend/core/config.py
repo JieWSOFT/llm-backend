@@ -38,7 +38,6 @@ class Settings(BaseSettings):
     # uvicorn
     SEVER_HOST: str = "0.0.0.0"
     SEVER_PORT: int = 3332
-
     # 路由跨域
     API_V1_STR: str = "/api/v1"
     FRONTEND_HOST: str = "http://localhost:5173"

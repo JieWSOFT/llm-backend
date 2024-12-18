@@ -17,7 +17,8 @@ reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/login/access-token"
 )
 
-def get_db() -> Generator[Session, None, None]:
+
+def get_db() -> Generator[Session]:
     with Session(engine) as session:
         yield session
 
@@ -42,16 +43,21 @@ def get_current_user(session: SessionDep, token: TokenDep) -> SysUser:
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
-def get_current_llm_user(session: SessionDep, token: TokenDep)-> SysUser:
-    user = get_current_user(session,token)
+
+def get_current_llm_user(session: SessionDep, token: TokenDep) -> SysUser:
+    user = get_current_user(session, token)
     if not user.llm_avaiable:
-        raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED, detail="您没有可用的消费额度了")
+        raise HTTPException(
+            status_code=status.HTTP_402_PAYMENT_REQUIRED,
+            detail="您没有可用的消费额度了",
+        )
     # 如果存在就数量减一
-    user.llm_avaiable =  user.llm_avaiable -1
+    user.llm_avaiable = user.llm_avaiable - 1
     session.add(user)
     session.commit()
     session.refresh(user)
     return user
-    
+
+
 CurrentUser = Annotated[SysUser, Depends(get_current_user)]
 CurrentLLMUser = Annotated[SysUser, Depends(get_current_llm_user)]
