@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordBearer
 import jwt
 from jwt.exceptions import InvalidTokenError
 from pydantic import ValidationError
-from sqlmodel import Session
+from sqlmodel import Session, select
 from core import security
 from core.db import engine
 from core.config import settings
@@ -38,7 +38,7 @@ def get_current_user(session: SessionDep, token: TokenDep) -> SysUser:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
         )
-    user = session.get(SysUser, token_data.sub)
+    user = session.get(SysUser, token_data.sub.split("#")[1])
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user

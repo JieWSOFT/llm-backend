@@ -14,12 +14,16 @@ router = APIRouter(tags=["wx"], prefix="/wx")
 
 
 def CreateUser(session: Session, openId):
-    user = SysUser(id=openId, username=str(uuid.uuid4())[:10])
-    userConfig = UserAction(id=openId, username=user.username)
+    user = SysUser(openId=openId, username=str(uuid.uuid4())[:10])
     session.add(user)
-    session.add(userConfig)
     session.commit()
     session.refresh(user)
+    user2 = session.exec(select(SysUser).where(SysUser.openId == openId)).first()
+    userConfig = UserAction(userId=user2.id, username=user.username)
+    session.add(userConfig)
+    session.commit()
+    session.refresh(userConfig)
+    return user2
 
 
 @router.post("/login", summary="微信code登录")
@@ -36,41 +40,43 @@ def wxLogin(
     if "errcode" in data:
         raise HTTPException(status_code=400, detail=data["errmsg"])
     openId = data["openid"]
-    token = create_access_token(openId)
-    statement = select(SysUser).where(SysUser.id == openId)
+    statement = select(SysUser).where(SysUser.openId == openId)
     session_user = session.exec(statement).first()
     if not session_user:
         logger.info(f"微信登录鉴权----pendding----用户不存在 创建用户----code: {code}")
-        CreateUser(session, openId)
+        session_user = CreateUser(session, openId)
     else:
         logger.info(f"微信登录鉴权----pendding----用户存在----code: {code}")
     logger.info(f"微信登录鉴权----end----code: {code}")
+    token = create_access_token(f"{openId}#{session_user.id}")
     return ApiResponse(code=200, data=token)
 
 
 @router.get("getUserInfo", summary="获取微信用户信息")
 def wxUserInfo(
     current_user: CurrentUser,
-)->ApiResponse:
-    current_user.id = None
-    return ApiResponse(code=200, data=current_user)
+) -> ApiResponse:
+
+    return ApiResponse(code=200, data=current_user.model_dump(exclude={"openId"}))
 
 
 @router.post("shareAddAvailableCounts", summary="分享添加次数")
 def wxShareAddAvailableCounts(
     current_user: CurrentUser,
     session: SessionDep,
-)->ApiResponse:
+) -> ApiResponse:
     statement = select(UserAction).where(current_user.id)
     sessionAction = session.exec(statement).first()
     if not sessionAction.shareCount:
         # 如果没有分享过才增加分享次数
-        action = UserAction(id=sessionAction.id, username=sessionAction.username,shareCount=1)
+        action = UserAction(
+            id=sessionAction.id, username=sessionAction.username, shareCount=1
+        )
         current_user.llm_avaiable += 3
         session.add(action)
         session.add(current_user)
         session.commit()
         session.refresh(current_user)
-        return ApiResponse(code=200, data=True)
+        return ApiResponse(code=200, data="")
     else:
-        return ApiResponse(code=500, data='该用户已经用过分享获取次数的机会')
+        return ApiResponse(code=500, data="该用户已经用过分享获取次数的机会")

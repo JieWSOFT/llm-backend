@@ -1,12 +1,14 @@
 from contextlib import asynccontextmanager
+import http
 import sys
+from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 from sqlmodel import Session, select
 from api.routes.llm import setTemplates
 from model import LLMTemplate
 from core.db import engine
 from core.config import settings
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from starlette.middleware.cors import CORSMiddleware
 from api.main import api_router
 from loguru import logger
@@ -27,6 +29,7 @@ async def lifespanself(app: FastAPI):
         statement = select(LLMTemplate)
         templates = session.exec(statement).all()
         setTemplates(templates)
+        logger.info(templates)
     yield
     # 结束停止的时候
 
@@ -50,7 +53,6 @@ def init_app():
             allow_methods=["*"],
             allow_headers=["*"],
         )
-
     app.include_router(api_router, prefix=settings.API_V1_STR)
 
     # 日志
@@ -65,3 +67,11 @@ def init_app():
 
 
 app = init_app()
+
+@app.exception_handler(Exception)
+async def general_exception_handler(request: Request, e: Exception):
+    logger.error(e)
+    return JSONResponse(
+        status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
+        content={"message": str(e)},
+    )

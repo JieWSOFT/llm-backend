@@ -1,8 +1,8 @@
-"""init model
+"""init
 
-Revision ID: d8d4ad342e9e
+Revision ID: 0cc55d5d17e8
 Revises: 
-Create Date: 2024-12-17 12:56:46.583119
+Create Date: 2024-12-18 18:10:12.616825
 
 """
 from typing import Sequence, Union
@@ -13,7 +13,7 @@ import sqlmodel.sql.sqltypes
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'd8d4ad342e9e'
+revision: str = '0cc55d5d17e8'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -24,11 +24,19 @@ def upgrade() -> None:
     op.create_table('llmtemplate',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('type', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('template', sa.TEXT(), nullable=True),
+    sa.Column('template', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('logs',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('userId', sa.Integer(), nullable=False),
+    sa.Column('createTime', sa.DateTime(), nullable=True),
+    sa.Column('content', sa.TEXT(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('sysuser',
-    sa.Column('id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('openId', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('username', sqlmodel.sql.sqltypes.AutoString(length=255), nullable=True),
     sa.Column('llm_avaiable', sa.Integer(), nullable=True),
     sa.Column('lastTime', sa.DateTime(), nullable=True),
@@ -36,13 +44,15 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('useraction',
-    sa.Column('id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('userId', sa.Integer(), nullable=False),
     sa.Column('username', sqlmodel.sql.sqltypes.AutoString(length=255), nullable=True),
     sa.Column('shareCount', sa.Integer(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('usercreatehistory',
-    sa.Column('id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('userId', sa.Integer(), nullable=False),
     sa.Column('username', sqlmodel.sql.sqltypes.AutoString(length=255), nullable=True),
     sa.Column('content', sa.TEXT(), nullable=True),
     sa.Column('params', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
@@ -56,5 +66,6 @@ def downgrade() -> None:
     op.drop_table('usercreatehistory')
     op.drop_table('useraction')
     op.drop_table('sysuser')
+    op.drop_table('logs')
     op.drop_table('llmtemplate')
     # ### end Alembic commands ###

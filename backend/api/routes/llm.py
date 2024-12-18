@@ -1,21 +1,26 @@
+import json
 from typing import Sequence
 from fastapi import APIRouter, Body
 from fastapi.responses import StreamingResponse
 from loguru import logger
+from sqlmodel import select
 from api.deps import CurrentLLMUser, CurrentUser, SessionDep
-from model import LLMTemplate
+from model import LLMTemplate, UserCreateHistory
 from llm.main import create_chain
 from api.type import ApiResponse, LLMRequestBody
 
 router = APIRouter(tags=["llm"], prefix="/llm")
-templates: Sequence[LLMTemplate]
+
+templates: Sequence[LLMTemplate] = []
 
 
 def setTemplates(_templates: Sequence[LLMTemplate]):
+    global templates
     templates = _templates
 
 
 def getTemplate(type: str) -> str:
+    global templates
     template: str = ""
     for temp in list(templates):
         if temp.type == type:
@@ -46,17 +51,37 @@ def streaming_endpoint(current_user: CurrentLLMUser, body: LLMRequestBody):
     "/generate", response_model=ApiResponse[str], summary="根据类型和参数直接生成"
 )
 async def generate_once(
-    current_user: CurrentLLMUser, body: LLMRequestBody
+    session: SessionDep, current_user: CurrentLLMUser, body: LLMRequestBody
 ) -> ApiResponse[str]:
     template = getTemplate(body.type)
-
     if not template:
-        return ApiResponse(code=500, message="未获取相对应的模板")
+        return ApiResponse(code=500, message="未获取相对应的模板", data="")
 
     chain = create_chain(template)
     # 生成完整内容
     result = await chain.ainvoke(body.params)
+
+    # 存储用户的生成纪录
+    log = UserCreateHistory(
+        userId=current_user.id,
+        username=current_user.username,
+        content=result.content,
+        params=json.dumps(body.params, ensure_ascii=False),
+    )
+    session.add(log)
+    session.commit()
+    session.refresh(log)
     return ApiResponse(code=200, data=result.content)
+
+
+@router.get("/generate/logs", summary="获取生成的历史纪录")
+def get_generate_log(session: SessionDep, current_user: CurrentUser):
+    statement = select(UserCreateHistory).where(
+        UserCreateHistory.userId == current_user.id
+    )
+    logs = session.exec(statement).all()
+    
+    return ApiResponse(code=200, data=logs)
 
 
 # 获取llm服务可用次数
@@ -71,7 +96,7 @@ def add_llm_available_num(
     session: SessionDep,
     current_user: CurrentUser,
     count: int = Body(1, embed=True, title="增加的调用次数"),
-) -> ApiResponse:
+):
     if not current_user.llm_avaiable:
         current_user.llm_avaiable = count
     else:
@@ -79,4 +104,4 @@ def add_llm_available_num(
     session.add(current_user)
     session.commit()
     session.refresh(current_user)
-    return ApiResponse(code=200)
+    return ApiResponse(code=200, data=True)

@@ -23,11 +23,13 @@ def parseTemplateParams(template: str):
 
 # """"""
 def create_chain(_template: str):
+    input_variables =  parseTemplateParams(_template),
+    print(input_variables)
     template = PromptTemplate(
-        input_variables=parseTemplateParams(_template), template=_template
+        input_variables=input_variables, template=_template
     )
     chain = template | chat_llm
     logger.info(
-        f"当前使用的LLM模型为  MODEL={settings.MODEL}  BASE_URL={settings.BASE_URL}"
+        f"当前使用的LLM模型为  MODEL={settings.MODEL}  BASE_URL={settings.BASE_URL} prompt: {template}"
     )
     return chain
