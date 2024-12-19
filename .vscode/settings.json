@@ -1,5 +1,17 @@
 {
   "terminal.integrated.env.windows": {
     "PYTHONPATH":"${workspaceFolder};${env:PYTHONPATH}"
-  }
+  },
+  "i18n-ally.localesPaths": [
+    "frontent/packages/locales",
+    "frontent/playground/src/locales",
+    "frontent/apps/web-antd/src/locales",
+    "frontent/apps/web-naive/src/locales",
+    "frontent/apps/web-ele/src/locales",
+    "frontent/playground/src/locales/langs",
+    "frontent/packages/locales/src/langs",
+    "frontent/apps/web-antd/src/locales/langs",
+    "frontent/apps/web-naive/src/locales/langs",
+    "frontent/apps/web-ele/src/locales/langs"
+  ]
 }
