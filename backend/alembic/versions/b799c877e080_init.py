@@ -1,8 +1,8 @@
 """init
 
-Revision ID: 0cc55d5d17e8
+Revision ID: b799c877e080
 Revises: 
-Create Date: 2024-12-18 18:10:12.616825
+Create Date: 2024-12-19 14:38:30.202277
 
 """
 from typing import Sequence, Union
@@ -13,7 +13,7 @@ import sqlmodel.sql.sqltypes
 
 
 # revision identifiers, used by Alembic.
-revision: str = '0cc55d5d17e8'
+revision: str = 'b799c877e080'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -25,13 +25,14 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('type', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('template', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('createTime', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('logs',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('userId', sa.Integer(), nullable=False),
-    sa.Column('createTime', sa.DateTime(), nullable=True),
     sa.Column('content', sa.TEXT(), nullable=True),
+    sa.Column('createTime', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('sysuser',
@@ -48,6 +49,7 @@ def upgrade() -> None:
     sa.Column('userId', sa.Integer(), nullable=False),
     sa.Column('username', sqlmodel.sql.sqltypes.AutoString(length=255), nullable=True),
     sa.Column('shareCount', sa.Integer(), nullable=True),
+    sa.Column('createTime', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('usercreatehistory',
@@ -56,6 +58,7 @@ def upgrade() -> None:
     sa.Column('username', sqlmodel.sql.sqltypes.AutoString(length=255), nullable=True),
     sa.Column('content', sa.TEXT(), nullable=True),
     sa.Column('params', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('createTime', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###

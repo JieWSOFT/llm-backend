@@ -3,7 +3,7 @@ from typing import Sequence
 from fastapi import APIRouter, Body
 from fastapi.responses import StreamingResponse
 from loguru import logger
-from sqlmodel import select
+from sqlmodel import desc, select
 from api.deps import CurrentLLMUser, CurrentUser, SessionDep
 from model import LLMTemplate, UserCreateHistory
 from llm.main import create_chain
@@ -76,11 +76,14 @@ async def generate_once(
 
 @router.get("/generate/logs", summary="获取生成的历史纪录")
 def get_generate_log(session: SessionDep, current_user: CurrentUser):
-    statement = select(UserCreateHistory).where(
-        UserCreateHistory.userId == current_user.id
+    statement = (
+        select(UserCreateHistory)
+        .where(UserCreateHistory.userId == current_user.id)
+        .order_by(desc(UserCreateHistory.createTime))
+        .limit(20)
     )
     logs = session.exec(statement).all()
-    
+
     return ApiResponse(code=200, data=logs)
 
 
