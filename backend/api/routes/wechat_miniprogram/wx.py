@@ -2,8 +2,9 @@ from fastapi import APIRouter, Body, HTTPException
 from loguru import logger
 import requests
 from sqlmodel import Session, select
-from api.deps import SessionDep, CurrentUser
+from api.routes.wechat_miniprogram.deps import SessionDep
 from api.type import ApiResponse
+from api.deps import CurrentUser
 from core.config import settings
 from core.security import create_access_token
 import uuid

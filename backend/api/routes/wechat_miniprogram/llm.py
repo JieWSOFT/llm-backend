@@ -1,31 +1,15 @@
 import json
-from typing import Sequence
 from fastapi import APIRouter, Body
 from fastapi.responses import StreamingResponse
 from loguru import logger
 from sqlmodel import desc, select
-from api.deps import CurrentLLMUser, CurrentUser, SessionDep
-from model import LLMTemplate, UserCreateHistory
-from llm.main import create_chain
+from api.routes.wechat_miniprogram.deps import CurrentLLMUser, SessionDep
+from api.deps import CurrentUser
+from model import  UserCreateHistory
+from llm.main import create_chain, getTemplate
 from api.type import ApiResponse, LLMRequestBody
 
 router = APIRouter(tags=["llm"], prefix="/llm")
-
-templates: Sequence[LLMTemplate] = []
-
-
-def setTemplates(_templates: Sequence[LLMTemplate]):
-    global templates
-    templates = _templates
-
-
-def getTemplate(type: str) -> str:
-    global templates
-    template: str = ""
-    for temp in list(templates):
-        if temp.type == type:
-            template = temp.template
-    return template
 
 
 # 流式生成作文 (HTTP)

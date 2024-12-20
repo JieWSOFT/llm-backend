@@ -4,7 +4,7 @@ import sys
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 from sqlmodel import Session, select
-from api.routes.llm import setTemplates
+from llm.main import setTemplates
 from model import LLMTemplate
 from core.db import engine
 from core.config import settings
@@ -67,6 +67,7 @@ def init_app():
 
 
 app = init_app()
+
 
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, e: Exception):

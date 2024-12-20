@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar, Optional
+from typing import Generic, List, TypeVar, Optional
 from pydantic import BaseModel
 
 T = TypeVar("T")
@@ -13,3 +13,8 @@ class ApiResponse(BaseModel, Generic[T]):
 class LLMRequestBody(BaseModel):
     type: str
     params: object
+
+
+class PageBody(BaseModel, Generic[T]):
+    total: int
+    list: List[T]
