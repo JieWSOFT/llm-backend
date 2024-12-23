@@ -85,6 +85,7 @@ def add_llm_available_num(
     current_user: CurrentUser,
     body: ShareReq,
 ):
+    logger.info(f'当前用户:{current_user.id}, 分享者id: {body.userId}')
     if body.type == "share":
         # 查询当前用户下已经获取过分享次数的ID
         actionInfo = session.exec(
