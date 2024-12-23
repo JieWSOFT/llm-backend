@@ -2,7 +2,7 @@ from fastapi import Depends, HTTPException, Request
 from loguru import logger
 
 
-ALLOWED_REFERER = "http://192.168.2.197:3333"
+ALLOWED_REFERER = "http://192.168.2.197:3333/"
 
 
 async def check_referer(request: Request):
