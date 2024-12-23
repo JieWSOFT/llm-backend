@@ -98,14 +98,15 @@ def add_llm_available_num(
                 shareIds=str(current_user.id),
                 username=current_user.username,
             )
-            session.add(actionInfo)
         else:
             shareIds = actionInfo.shareIds
             if shareIds:
                 if not current_user.id in shareIds.split(","):
+                    actionInfo.shareIds = shareIds + "," + current_user.id
                     isAdd = True
             else:
                 if current_user.id != body.userId:
+                    actionInfo.shareIds = str(current_user.id)
                     isAdd = True
         if isAdd:
             logger.info(
@@ -116,6 +117,8 @@ def add_llm_available_num(
             else:
                 current_user.llm_avaiable = 1 + current_user.llm_avaiable
             session.add(current_user)
+            session.add(actionInfo)
             session.commit()
             session.refresh(current_user)
+            session.refresh(actionInfo)
         return ApiResponse(code=200, data=True)
