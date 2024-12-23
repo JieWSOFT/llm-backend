@@ -2,6 +2,7 @@ import json
 from fastapi import APIRouter, Body
 from fastapi.responses import StreamingResponse
 from loguru import logger
+from sqlalchemy import func
 from sqlmodel import desc, select
 from api.routes.wechat_miniprogram.deps import CurrentLLMUser, SessionDep
 from api.deps import CurrentUser
@@ -85,30 +86,19 @@ def add_llm_available_num(
     current_user: CurrentUser,
     body: ShareReq,
 ):
-    logger.info(f'当前用户:{current_user.id}, 分享者id: {body.userId}')
     if body.type == "share":
+        logger.info(f"当前用户:{current_user.id}, 分享者id: {body.userId}")
         # 查询当前用户下已经获取过分享次数的ID
-        actionInfo = session.exec(
-            select(UserAction).where(UserAction.userId == body.userId)
+        count = session.exec(
+            select(func.count(UserAction.id)).where(
+                UserAction.userId == body.userId,
+                UserAction.type == "share",
+                UserAction.toUserId == current_user.id,
+            )
         ).first()
         isAdd = False
-        if not actionInfo:
+        if not count:
             isAdd = True
-            actionInfo = UserAction(
-                userId=body.userId,
-                shareIds=str(current_user.id),
-                username=current_user.username,
-            )
-        else:
-            shareIds = actionInfo.shareIds
-            if shareIds:
-                if not current_user.id in shareIds.split(","):
-                    actionInfo.shareIds = shareIds + "," + current_user.id
-                    isAdd = True
-            else:
-                if current_user.id != body.userId:
-                    actionInfo.shareIds = str(current_user.id)
-                    isAdd = True
         if isAdd:
             logger.info(
                 f"用户ID:{current_user.id},用户名：{current_user.username}点击了id:{body.userId},+1"
@@ -118,8 +108,11 @@ def add_llm_available_num(
             else:
                 current_user.llm_avaiable = 1 + current_user.llm_avaiable
             session.add(current_user)
-            session.add(actionInfo)
+            actioninfo = UserAction(
+                userId=body.userId, toUserId=current_user.id, type="share"
+            )
+            session.add(actioninfo)
             session.commit()
             session.refresh(current_user)
-            session.refresh(actionInfo)
+            session.refresh(actioninfo)
         return ApiResponse(code=200, data=True)

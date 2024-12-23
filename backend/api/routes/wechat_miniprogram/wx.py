@@ -20,10 +20,6 @@ def CreateUser(session: Session, openId):
     session.commit()
     session.refresh(user)
     user2 = session.exec(select(SysUser).where(SysUser.openId == openId)).first()
-    userConfig = UserAction(userId=user2.id, username=user.username)
-    session.add(userConfig)
-    session.commit()
-    session.refresh(userConfig)
     return user2
 
 
@@ -59,4 +55,3 @@ def wxUserInfo(
 ) -> ApiResponse:
 
     return ApiResponse(code=200, data=current_user.model_dump(exclude={"openId"}))
-

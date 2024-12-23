@@ -19,7 +19,8 @@ class UserAction(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     userId: int = Field()
     username: str | None = Field(default=None, max_length=255)
-    shareIds: Optional[str] = Field(default=None)
+    type: Optional[str] = Field(default=None)
+    toUserId: Optional[str] = Field(default=None)
     createTime: Optional[datetime] = Field(default_factory=datetime.now)
 
 
