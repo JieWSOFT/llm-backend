@@ -7,6 +7,7 @@ from api.type import ApiResponse, PageBody
 from api.routes.bms.deps import checkReferer
 from api.deps import SessionDep
 from api.routes.bms.type import llmTempBody
+from llm.main import setTemplates
 from model import LLMTemplate
 
 
@@ -39,6 +40,10 @@ def addTemp(session: SessionDep, body: llmTempBody):
     session.add(temp)
     session.commit()
     session.refresh(temp)
+    # 更新模板
+    statement = select(LLMTemplate)
+    templates = session.exec(statement).all()
+    setTemplates(templates)
     return ApiResponse(code=200, data="")
 
 
@@ -61,6 +66,10 @@ def updateTemp(session: SessionDep, body: llmTempBody):
     session.add(item)
     session.commit()
     session.refresh(item)
+    # 更新模板
+    statement = select(LLMTemplate)
+    templates = session.exec(statement).all()
+    setTemplates(templates)
     return ApiResponse(code=200, data="")
 
 
@@ -72,4 +81,8 @@ def deleteTemp(session: SessionDep, id=Query(description="模板ID")):
         return ApiResponse(code=500, data="没有这条纪录去删除")
     session.delete(item)
     session.commit()
+    # 更新模板
+    statement = select(LLMTemplate)
+    templates = session.exec(statement).all()
+    setTemplates(templates)
     return ApiResponse(code=200, data="")
