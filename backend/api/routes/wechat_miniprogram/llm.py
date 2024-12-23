@@ -104,8 +104,13 @@ def add_llm_available_num(
             if shareIds:
                 if not current_user.id in shareIds.split(","):
                     isAdd = True
+            else:
+                if current_user.id != body.userId:
+                    isAdd = True
         if isAdd:
-            logger.info(f'用户ID:{current_user.id},用户名：{current_user.username}点击了id:{body.userId},+1')
+            logger.info(
+                f"用户ID:{current_user.id},用户名：{current_user.username}点击了id:{body.userId},+1"
+            )
             if not current_user.llm_avaiable:
                 current_user.llm_avaiable = 1
             else:
