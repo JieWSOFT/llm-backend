@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Query
 from loguru import logger
 from sqlalchemy import func
-from sqlmodel import select
+from sqlmodel import desc, select
 
 from api.type import ApiResponse, PageBody
 from api.routes.bms.deps import checkReferer
@@ -23,9 +23,13 @@ def getTempList(
     # 构造查询
     statement = select(func.count(LLMTemplate.id))
     total_count = session.exec(statement).first()
-    statement = select(LLMTemplate).offset(page).limit(pageSize)
+    statement = (
+        select(LLMTemplate)
+        .order_by(desc(LLMTemplate.createTime))
+        .offset(page)
+        .limit(pageSize)
+    )
     results = session.exec(statement).all()
-    logger.info(results)
     return ApiResponse(code=200, data=PageBody(total=total_count, list=results))
 
 
@@ -34,7 +38,7 @@ def addTemp(session: SessionDep, body: llmTempBody):
     temp = LLMTemplate(template=body.template, type=body.type)
     session.add(temp)
     session.commit()
-    session.refresh()
+    session.refresh(temp)
     return ApiResponse(code=200, data="")
 
 
@@ -56,17 +60,16 @@ def updateTemp(session: SessionDep, body: llmTempBody):
 
     session.add(item)
     session.commit()
-    session.refresh()
+    session.refresh(item)
     return ApiResponse(code=200, data="")
 
 
 @router.delete("/temp/delete", dependencies=[checkReferer], summary="根据ID删除")
 def deleteTemp(session: SessionDep, id=Query(description="模板ID")):
-    statement = select(LLMTemplate).where(LLMTemplate.id == id)
+    statement = select(LLMTemplate).where(LLMTemplate.id == int(id))
     item = session.exec(statement).first()
     if not item:
         return ApiResponse(code=500, data="没有这条纪录去删除")
     session.delete(item)
     session.commit()
-    session.refresh()
     return ApiResponse(code=200, data="")

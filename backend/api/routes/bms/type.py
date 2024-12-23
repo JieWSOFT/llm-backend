@@ -3,6 +3,6 @@ from pydantic import BaseModel
 
 
 class llmTempBody(BaseModel):
-    id: Optional[int]
+    id: Optional[int] = None
     type: str
     template: str
