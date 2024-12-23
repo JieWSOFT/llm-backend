@@ -115,4 +115,4 @@ def add_llm_available_num(
             session.commit()
             session.refresh(current_user)
             session.refresh(actioninfo)
-        return ApiResponse(code=200, data=True)
+    return ApiResponse(code=200, data=True)
