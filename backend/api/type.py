@@ -9,12 +9,6 @@ class ApiResponse(BaseModel, Generic[T]):
     code: int = 200
     data: Optional[T]
 
-
-class LLMRequestBody(BaseModel):
-    type: str
-    params: object
-
-
 class PageBody(BaseModel, Generic[T]):
     total: int
     list: List[T]

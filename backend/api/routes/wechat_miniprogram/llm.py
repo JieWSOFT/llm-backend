@@ -5,9 +5,10 @@ from loguru import logger
 from sqlmodel import desc, select
 from api.routes.wechat_miniprogram.deps import CurrentLLMUser, SessionDep
 from api.deps import CurrentUser
-from model import  UserCreateHistory
+from api.routes.wechat_miniprogram.type import LLMRequestBody, ShareReq
+from model import UserAction, UserCreateHistory
 from llm.main import create_chain, getTemplate
-from api.type import ApiResponse, LLMRequestBody
+from api.type import ApiResponse
 
 router = APIRouter(tags=["llm"], prefix="/llm")
 
@@ -82,13 +83,33 @@ def get_llm_available(current_user: CurrentUser) -> ApiResponse[int]:
 def add_llm_available_num(
     session: SessionDep,
     current_user: CurrentUser,
-    count: int = Body(1, embed=True, title="增加的调用次数"),
+    body: ShareReq,
 ):
-    if not current_user.llm_avaiable:
-        current_user.llm_avaiable = count
-    else:
-        current_user.llm_avaiable = count + current_user.llm_avaiable
-    session.add(current_user)
-    session.commit()
-    session.refresh(current_user)
-    return ApiResponse(code=200, data=True)
+    if body.type == "share":
+        # 查询当前用户下已经获取过分享次数的ID
+        actionInfo = session.exec(
+            select(UserAction).where(UserAction.userId == body.userId)
+        ).first()
+        isAdd = False
+        if not actionInfo:
+            isAdd = True
+            actionInfo = UserAction(
+                userId=body.userId,
+                shareIds=str(current_user.id),
+                username=current_user.username,
+            )
+            session.add(actionInfo)
+        else:
+            shareIds = actionInfo.shareIds
+            if shareIds:
+                if not current_user.id in shareIds.split(","):
+                    isAdd = True
+        if isAdd:
+            if not current_user.llm_avaiable:
+                current_user.llm_avaiable = 1
+            else:
+                current_user.llm_avaiable = 1 + current_user.llm_avaiable
+            session.add(current_user)
+            session.commit()
+            session.refresh(current_user)
+        return ApiResponse(code=200, data=True)
