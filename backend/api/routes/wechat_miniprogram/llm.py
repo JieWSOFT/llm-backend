@@ -97,7 +97,7 @@ def add_llm_available_num(
             )
         ).first()
         isAdd = False
-        if not count:
+        if not count and current_user.id != body.userId:
             isAdd = True
         if isAdd:
             logger.info(
