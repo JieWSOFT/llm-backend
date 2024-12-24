@@ -52,6 +52,26 @@ services:
       BASE_URL: ${BASE_URL?Variable not set}
       MODEL: ${MODEL?Variable not set}
       API_KEY: ${API_KEY?Variable not set}
+  scheduler:
+    build:
+      context: ./scheduler
+    restart: always
+    network_mode: host
+    volumes:
+      - bakend-logs:/scheduler/log
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+      prestart:
+        condition: service_completed_successfully
+    env_file:
+      - .env
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD?Variable not set}
+      - POSTGRES_USER=${POSTGRES_USER?Variable not set}
+      - POSTGRES_DB=${POSTGRES_DB?Variable not set}
 volumes:
   app-db-data:
   bakend-logs:
