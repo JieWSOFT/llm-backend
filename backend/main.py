@@ -5,7 +5,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 from sqlmodel import Session, select
-from llm.main import setTemplates
+from llm.main import load_config, on_config_change, setTemplates
 from model import LLMTemplate
 from core.db import engine
 from core.config import settings
@@ -25,14 +25,14 @@ def custom_generate_unique_id(route: APIRoute) -> str:
 
 
 # 注册nacos
-nacos_endpoint = "192.168.2.197:8848"
-nacos_namespace_id = ""
-nacos_group_name = "DEFAULT_GROUP"
+nacos_endpoint = settings.NACOS_ENDPOINT
+nacos_namespace_id = settings.NACOS_NAMESPACE_ID
+nacos_group_name = settings.NACOS_GROUPNAME
 # nacos_username = 'nacos'
 # nacos_password = 'nacos'
-service_name = "llm-backend"
-service_port = 3332
-beat_interval = 30
+service_name = settings.PROJECT_NAME
+service_port = settings.SEVER_PORT
+beat_interval = settings.NACOS_BEAT_INTERVAL
 
 nacos = NacosHelper(nacos_endpoint, nacos_namespace_id)
 nacos.set_service(service_name, service_port, nacos_group_name)
@@ -46,15 +46,15 @@ async def lifespanself(app: FastAPI):
         statement = select(LLMTemplate)
         templates = session.exec(statement).all()
         setTemplates(templates)
-        logger.info(templates)
     nacos.register()
     # 启动心跳线程
     scheduler = AsyncIOScheduler()
-    scheduler.add_job(nacos.beat_callback, 'interval', seconds=beat_interval)
+    scheduler.add_job(nacos.beat_callback, "interval", seconds=beat_interval)
     scheduler.start()
     yield
     # 结束停止的时候
     nacos.unregister()
+
 
 def init_app():
     # 初始化 FastAPI 应用
@@ -75,14 +75,16 @@ def init_app():
             allow_methods=["*"],
             allow_headers=["*"],
         )
-    
+
     app.include_router(api_router, prefix=settings.API_V1_STR)
 
-    nacosConfig = nacos.load_conf(data_id="ai_model", group="DEFAULT_GROUP")
-    app.state = {"config_data": nacosConfig}
+    # 注册配置变更监控回调
+    nacos.add_conf_watcher("ai_model", nacos_group_name, on_config_change)
 
+    # 启动时，强制同步一次配置
+    data_stream = nacos.load_conf("ai_model", nacos_group_name)
+    load_config(data_stream)
 
-    
     # 日志
     logging.getLogger().handlers = [InterceptHandler()]
     logger.configure(
@@ -96,10 +98,6 @@ def init_app():
 
 app = init_app()
 
-# 定义一个GET请求的路由，返回简单的欢迎信息及当前从Nacos获取的配置数据
-@app.get("/")
-def hello_world():
-    return f'Hello, World! Config from Nacos: {app.state["config_data"]}'
 
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, e: Exception):

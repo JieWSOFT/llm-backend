@@ -1,0 +1,3 @@
+BASE_URL: "http://localhost:11434/v1/"
+MODEL: "qwen2:7b"
+API_KEY: 'ollama'

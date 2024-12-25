@@ -17,9 +17,11 @@ def parse_cors(v: Any) -> list[str] | str:
 
 
 sk = "asdkasldqhiwe--12312k---0sadnsjkn asa."
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file =  "../.env",
+        env_file="../.env",
         env_ignore_empty=True,
         extra="ignore",
     )
@@ -27,13 +29,16 @@ class Settings(BaseSettings):
     ENVIRONMENT: str
     PROJECT_NAME: str
     SECRET_KEY: str = sk
-    LOG_DIR: str = os.path.join(os.getcwd(), f'log/backend-{time.strftime("%Y-%m-%d")}.log')
+    LOG_DIR: str = os.path.join(
+        os.getcwd(), f'log/backend-{time.strftime("%Y-%m-%d")}.log'
+    )
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
     # LLM
     BASE_URL: str = "http://localhost:11434/v1/"
     MODEL: str = "qwen2:7b"
-    API_KEY: str = 'ollama'
+    API_KEY: str = "ollama"
+
     # uvicorn
     SEVER_HOST: str = "0.0.0.0"
     SEVER_PORT: int = 3332
@@ -73,5 +78,12 @@ class Settings(BaseSettings):
             port=self.POSTGRES_PORT,
             path=self.POSTGRES_DB,
         )
+
+    # NACOS
+    NACOS_ENDPOINT: str = "192.168.2.197:8848"
+    NACOS_NAMESPACE_ID: str = ""
+    NACOS_GROUPNAME: str = "DEFAULT_GROUP"
+    NACOS_BEAT_INTERVAL: int = 30
+
 
 settings = Settings()
