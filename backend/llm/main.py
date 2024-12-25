@@ -31,7 +31,7 @@ def create_chain(_template: str):
     template = PromptTemplate(input_variables=input_variables, template=_template)
     chain = template | chat_llm
     logger.info(
-        f"当前使用的LLM模型为  MODEL={settings.MODEL}  BASE_URL={settings.BASE_URL}"
+        f"当前使用的LLM模型为  MODEL={settings.MODEL}  BASE_URL={settings.BASE_URL} prompt: {template}"
     )
     return chain
 
@@ -55,18 +55,26 @@ def getTemplate(type: str) -> str:
 
 def load_config(content):
     yaml_config = yaml.full_load(content)
-    settings.BASE_URL = yaml_config["BASE_URL"]
-    settings.MODEL = yaml_config["MODEL"]
-    settings.API_KEY = yaml_config["API_KEY"]
-
-
-def on_config_change(args):
-    content = args["raw_content"]
-    load_config(content)
-    logger.info(f'配置变更 当前使用的LLM模型为  MODEL={settings.MODEL}  BASE_URL={settings.BASE_URL}')
+    settings.BASE_URL = (
+        settings.BASE_URL if not "BASE_URL" in yaml_config else yaml_config["BASE_URL"]
+    )
+    settings.MODEL = (
+        settings.MODEL if not "MODEL" in yaml_config else yaml_config["MODEL"]
+    )
+    settings.API_KEY = (
+        settings.API_KEY if not "API_KEY" in yaml_config else yaml_config["API_KEY"]
+    )
+    logger.info(
+        f"配置信息 当前使用的LLM模型为  MODEL={settings.MODEL}  BASE_URL={settings.BASE_URL}"
+    )
     global chat_llm
     chat_llm = ChatOpenAI(
         model=settings.MODEL,
         base_url=settings.BASE_URL,
         api_key=settings.API_KEY,
     )
+
+
+def on_config_change(args):
+    content = args["raw_content"]
+    load_config(content)

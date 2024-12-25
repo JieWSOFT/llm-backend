@@ -6,6 +6,7 @@ dist/
 wheels/
 *.egg-info
 log/
+nacos-data/
 
 # Virtual environments
 .venv
