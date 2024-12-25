@@ -15,6 +15,7 @@ from loguru import logger
 import logging
 
 from utils.custom_logging import InterceptHandler, format_record
+from utils.nacos_helper import NacosHelper
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
@@ -30,6 +31,20 @@ async def lifespanself(app: FastAPI):
         templates = session.exec(statement).all()
         setTemplates(templates)
         logger.info(templates)
+    # 注册nacos
+    nacos_endpoint = "192.168.2.197:8848"
+    nacos_namespace_id = ""
+    nacos_group_name = "DEFAULT_GROUP"
+    # nacos_username = 'nacos'
+    # nacos_password = 'nacos'
+    nacos_data_id = "ai_model"
+    service_name = "llm-backend"
+    service_port = 3332
+    beat_interval = 30
+    
+    nacos = NacosHelper(nacos_endpoint, nacos_namespace_id)
+    nacos.set_service(service_name, service_port, nacos_group_name)
+    nacos.register()
     yield
     # 结束停止的时候
 
