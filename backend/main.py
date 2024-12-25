@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 import http
 import sys
+import threading
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 from sqlmodel import Session, select
@@ -34,6 +35,7 @@ service_port = 3332
 
 nacos = NacosHelper(nacos_endpoint, nacos_namespace_id)
 nacos.set_service(service_name, service_port, nacos_group_name)
+heartbeat_thread = threading.Thread(target=nacos.beat_callback, daemon=True)
 
 
 # 初始化模板
@@ -46,9 +48,11 @@ async def lifespanself(app: FastAPI):
         setTemplates(templates)
         logger.info(templates)
     nacos.register()
+    # 启动心跳线程
+    heartbeat_thread.start()
     yield
     # 结束停止的时候
-
+    nacos.unregister()
 
 def init_app():
     # 初始化 FastAPI 应用
