@@ -16,4 +16,6 @@ dependencies = [
     "pyjwt>=2.10.1",
     "loguru>=0.7.3",
     "uvicorn==0.34.0",
+    "nacos-sdk-python>=1.0.0",
+    "netutils>=1.10.0",
 ]

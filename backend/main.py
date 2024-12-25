@@ -14,7 +14,7 @@ from api.main import api_router
 from loguru import logger
 import logging
 
-from custom_logging import InterceptHandler, format_record
+from utils.custom_logging import InterceptHandler, format_record
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
