@@ -16,7 +16,7 @@ class NacosHelper:
             password=password,
         )
         self.endpoint = server_endpoint
-        service_ip = "192.168.2.197"
+        service_ip = get_host_ip()
         logger.info(f"服务器IP:{service_ip}")
         self.service_ip = service_ip
 

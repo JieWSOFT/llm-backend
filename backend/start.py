@@ -1,7 +1,7 @@
 from utils.nacos_helper import NacosHelper
 from core.config import settings
 
-nacos_endpoint = "192.168.2.197:8848"
+nacos_endpoint = "127.0.0.1:8848"
 nacos_namespace_id = ""
 nacos_group_name = "DEFAULT_GROUP"
 # nacos_username = 'nacos'
