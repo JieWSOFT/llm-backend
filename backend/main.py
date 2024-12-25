@@ -19,7 +19,21 @@ from utils.nacos_helper import NacosHelper
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
-    return f"{route.tags[0]}-{route.name}"
+    if route.tags:
+        return f"{route.tags[0]}-{route.name}"
+
+
+# 注册nacos
+nacos_endpoint = "192.168.2.197:8848"
+nacos_namespace_id = ""
+nacos_group_name = "DEFAULT_GROUP"
+# nacos_username = 'nacos'
+# nacos_password = 'nacos'
+service_name = "llm-backend"
+service_port = 3332
+
+nacos = NacosHelper(nacos_endpoint, nacos_namespace_id)
+nacos.set_service(service_name, service_port, nacos_group_name)
 
 
 # 初始化模板
@@ -31,17 +45,6 @@ async def lifespanself(app: FastAPI):
         templates = session.exec(statement).all()
         setTemplates(templates)
         logger.info(templates)
-    # 注册nacos
-    nacos_endpoint = "192.168.2.197:8848"
-    nacos_namespace_id = ""
-    nacos_group_name = "DEFAULT_GROUP"
-    # nacos_username = 'nacos'
-    # nacos_password = 'nacos'
-    service_name = "llm-backend"
-    service_port = 3332
-    
-    nacos = NacosHelper(nacos_endpoint, nacos_namespace_id)
-    nacos.set_service(service_name, service_port, nacos_group_name)
     nacos.register()
     yield
     # 结束停止的时候
@@ -66,8 +69,14 @@ def init_app():
             allow_methods=["*"],
             allow_headers=["*"],
         )
+    
     app.include_router(api_router, prefix=settings.API_V1_STR)
 
+    nacosConfig = nacos.load_conf(data_id="ai_model", group="DEFAULT_GROUP")
+    app.state = {"config_data": nacosConfig}
+
+
+    
     # 日志
     logging.getLogger().handlers = [InterceptHandler()]
     logger.configure(
@@ -85,7 +94,6 @@ app = init_app()
 @app.get("/")
 def hello_world():
     return f'Hello, World! Config from Nacos: {app.state["config_data"]}'
-
 
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, e: Exception):
