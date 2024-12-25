@@ -10,6 +10,7 @@ nacos_data_id = "ai_model"
 service_name = "llm-backend"
 service_port = 3332
 beat_interval = 30
+
 nacos = NacosHelper(nacos_endpoint, nacos_namespace_id)
 nacos.set_service(service_name, service_port, nacos_group_name)
 nacos.register()
@@ -17,7 +18,6 @@ nacos.register()
 if __name__ == "__main__":
     # 初始化模板
     import uvicorn
-
     uvicorn.run(
         app="main:app",
         host=settings.SEVER_HOST,
