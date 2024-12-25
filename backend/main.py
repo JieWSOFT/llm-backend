@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 import http
 import sys
-import threading
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 from sqlmodel import Session, select
@@ -32,10 +32,10 @@ nacos_group_name = "DEFAULT_GROUP"
 # nacos_password = 'nacos'
 service_name = "llm-backend"
 service_port = 3332
+beat_interval = 30
 
 nacos = NacosHelper(nacos_endpoint, nacos_namespace_id)
 nacos.set_service(service_name, service_port, nacos_group_name)
-heartbeat_thread = threading.Thread(target=nacos.beat_callback, daemon=True)
 
 
 # 初始化模板
@@ -49,7 +49,9 @@ async def lifespanself(app: FastAPI):
         logger.info(templates)
     nacos.register()
     # 启动心跳线程
-    heartbeat_thread.start()
+    scheduler = AsyncIOScheduler()
+    scheduler.add_job(nacos.beat_callback, 'interval', seconds=beat_interval)
+    scheduler.start()
     yield
     # 结束停止的时候
     nacos.unregister()

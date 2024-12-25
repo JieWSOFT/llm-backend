@@ -39,6 +39,9 @@ class NacosHelper:
         self.service_group = service_group
 
     async def beat_callback(self):
+        logger.info(
+            f"发送心跳： ServerName{self.service_name} IP: {self.service_ip} Port:{self.service_port}"
+        )
         self.client.send_heartbeat(
             self.service_name, self.service_ip, self.service_port
         )

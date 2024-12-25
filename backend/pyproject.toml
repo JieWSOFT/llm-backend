@@ -18,4 +18,5 @@ dependencies = [
     "uvicorn==0.34.0",
     "nacos-sdk-python>=1.0.0",
     "netutils>=1.10.0",
+    "apscheduler>=3.11.0",
 ]
