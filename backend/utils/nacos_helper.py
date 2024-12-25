@@ -17,7 +17,7 @@ class NacosHelper:
         )
         self.endpoint = server_endpoint
         service_ip = get_host_ip()
-        logger.info("服务器IP:{service_ip}")
+        logger.info(f"服务器IP:{service_ip}")
         self.service_ip = service_ip
 
     def register(self):
