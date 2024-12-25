@@ -16,8 +16,9 @@ class NacosHelper:
             password=password,
         )
         self.endpoint = server_endpoint
-        self.service_ip = get_host_ip()
-        logger.info("服务器IP:{self.service_ip}")
+        service_ip = get_host_ip()
+        logger.info("服务器IP:{service_ip}")
+        self.service_ip = service_ip
 
     def register(self):
         self.client.add_naming_instance(
