@@ -37,10 +37,8 @@ async def lifespanself(app: FastAPI):
     nacos_group_name = "DEFAULT_GROUP"
     # nacos_username = 'nacos'
     # nacos_password = 'nacos'
-    nacos_data_id = "ai_model"
     service_name = "llm-backend"
     service_port = 3332
-    beat_interval = 30
     
     nacos = NacosHelper(nacos_endpoint, nacos_namespace_id)
     nacos.set_service(service_name, service_port, nacos_group_name)
@@ -82,6 +80,11 @@ def init_app():
 
 
 app = init_app()
+
+# 定义一个GET请求的路由，返回简单的欢迎信息及当前从Nacos获取的配置数据
+@app.get("/")
+def hello_world():
+    return f'Hello, World! Config from Nacos: {app.state["config_data"]}'
 
 
 @app.exception_handler(Exception)
