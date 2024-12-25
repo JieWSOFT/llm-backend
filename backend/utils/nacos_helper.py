@@ -1,5 +1,6 @@
 import nacos
 from utils.net_utils import get_host_ip
+from loguru import logger
 
 
 class NacosHelper:
@@ -16,6 +17,7 @@ class NacosHelper:
         )
         self.endpoint = server_endpoint
         self.service_ip = get_host_ip()
+        logger.info("服务器IP:{self.service_ip}")
 
     def register(self):
         self.client.add_naming_instance(
