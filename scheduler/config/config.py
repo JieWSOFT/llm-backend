@@ -1,22 +1,24 @@
-import os
-import time
+from pathlib import Path
+from datetime import datetime
 from pydantic import PostgresDsn, computed_field
-from pydantic_core import MultiHostUrl
 from pydantic_settings import BaseSettings
 
-
 class Settings(BaseSettings):
-    # 数据库
+    # 项目配置
+    PROJECT_NAME: str = "scheduler"
+    LOG_DIR: Path = Path(f"log/scheduler-{datetime.now():%Y-%m-%d}.log")
+    
+    # 数据库配置
     POSTGRES_SERVER: str
     POSTGRES_PORT: int = 5432
     POSTGRES_USER: str
-    POSTGRES_PASSWORD: str = ""
-    POSTGRES_DB: str = ""
+    POSTGRES_PASSWORD: str
+    POSTGRES_DB: str
 
-    @computed_field  # type: ignore[prop-decorator]
+    @computed_field
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
-        return MultiHostUrl.build(
+        return PostgresDsn.build(
             scheme="postgresql+psycopg",
             username=self.POSTGRES_USER,
             password=self.POSTGRES_PASSWORD,
@@ -24,8 +26,5 @@ class Settings(BaseSettings):
             port=self.POSTGRES_PORT,
             path=self.POSTGRES_DB,
         )
-
-    LOG_DIR: str = os.path.join(os.getcwd(), f'log/sheduler-{time.strftime("%Y-%m-%d")}.log')
-
 
 settings = Settings()
