@@ -1,5 +1,7 @@
 FROM python:3.10
 
+# 添加时区环境变量，亚洲，上海
+ENV TimeZone=Asia/Shanghai
 ENV PYTHONUNBUFFERED=1
 
 WORKDIR /backend

@@ -2,6 +2,9 @@ FROM python:3.10
 
 ENV PYTHONUNBUFFERED=1
 
+# 添加时区环境变量，亚洲，上海
+ENV TimeZone=Asia/Shanghai
+
 WORKDIR /scheduler
 
 # Install uv
