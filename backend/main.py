@@ -46,14 +46,27 @@ async def lifespanself(app: FastAPI):
         statement = select(LLMTemplate)
         templates = session.exec(statement).all()
         setTemplates(templates)
-    nacos.register()
-    # 启动心跳线程
-    scheduler = AsyncIOScheduler()
-    scheduler.add_job(nacos.beat_callback, "interval", seconds=beat_interval)
-    scheduler.start()
+    try:
+        nacos.register()
+        # 注册配置变更监控回调
+        nacos.add_conf_watcher("ai_model", nacos_group_name, on_config_change)
+        # 启动时，强制同步一次配置
+        data_stream = nacos.load_conf("ai_model", nacos_group_name)
+        load_config(data_stream)
+        # 启动心跳线程
+        scheduler = AsyncIOScheduler()
+        scheduler.add_job(nacos.beat_callback, "interval", seconds=beat_interval)
+        scheduler.start()
+    except Exception as e:
+        logger.error(f"nacos服务注册异常,异常：{e}使用默认配置")
+        
     yield
+    
     # 结束停止的时候
-    nacos.unregister()
+    try:
+        nacos.unregister()
+    except Exception as e:
+        logger.error(f"nacos服务注销异常,异常：{e}使用默认配置")
 
 
 def init_app():
@@ -76,14 +89,7 @@ def init_app():
             allow_headers=["*"],
         )
 
-    app.include_router(api_router, prefix=settings.API_V1_STR)
-
-    # 注册配置变更监控回调
-    nacos.add_conf_watcher("ai_model", nacos_group_name, on_config_change)
-
-    # 启动时，强制同步一次配置
-    data_stream = nacos.load_conf("ai_model", nacos_group_name)
-    load_config(data_stream)
+    app.include_router(api_router, prefix=settings.API_V1_STR)    
 
     # 日志
     logging.getLogger().handlers = [InterceptHandler()]
@@ -93,6 +99,7 @@ def init_app():
     logger.add(settings.LOG_DIR, encoding="utf-8", rotation="9:46")
     logging.getLogger("uvicorn").handlers = [InterceptHandler()]
     logging.getLogger("uvicorn.access").handlers = [InterceptHandler()]
+    
     return app
 
 

@@ -8,6 +8,9 @@ from typing import Sequence
 from model import LLMTemplate
 
 # 初始化 LangChain 的 ChatOpenAI 模型
+logger.info(
+    f"配置信息 当前使用的LLM模型为  MODEL={settings.MODEL}  BASE_URL={settings.BASE_URL} API_KEY={settings.API_KEY}"
+)
 chat_llm = ChatOpenAI(
     model=settings.MODEL,
     base_url=settings.BASE_URL,
