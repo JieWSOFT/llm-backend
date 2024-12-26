@@ -43,40 +43,26 @@ nacos.set_service(service_name, service_port, nacos_group_name)
 async def lifespanself(app: FastAPI):
     # 启动前 查询模板
     with Session(engine) as session:
-        statement = select(LLMTemplate)
-        templates = session.exec(statement).all()
+        templates = session.exec(select(LLMTemplate)).all()
         setTemplates(templates)
     
-    logger.info(f"nacos.is_enabled(): {nacos.is_enabled()}")
-    if settings.ENABLE_NACOS and nacos.is_enabled():
-        try:
-            logger.info("Nacos服务注册开始")
-            nacos.register()
-            # 注册配置变更监控回调
-            nacos.add_conf_watcher("ai_model", nacos_group_name, on_config_change)
-            # 启动时，强制同步一次配置
-            data_stream = nacos.load_conf("ai_model", nacos_group_name)
-            load_config(data_stream)
-            # 启动心跳线程
-            scheduler = AsyncIOScheduler()
-            scheduler.add_job(nacos.beat_callback, "interval", seconds=beat_interval)
-            scheduler.start()
-            logger.info("Nacos服务注册成功")
-        except Exception as e:
-            logger.error(f"Nacos服务注册异常: {e}")
-    else:
-        logger.info("Nacos服务未启用，使用默认配置")
+    # 启动 Nacos 调度器（同时设置心跳间隔）
+    try:
+        nacos.start_scheduler(beat_interval)
+        # 尝试初始化 Nacos 服务，但不等待重试
+        logger.info("Nacos服务注册开始")
+        await nacos.init_service("ai_model", nacos_group_name, on_config_change)
+    except Exception as e:
+        logger.warning(f"Nacos服务初始化失败: {e}，应用将使用默认配置启动")
+        # 不影响应用启动，后台任务会继续尝试重连
         
     yield
     
     # 结束停止的时候
-    if settings.ENABLE_NACOS and nacos.is_enabled():
-        try:
-            nacos.unregister()
-            # 关闭 Nacos 的调度器
-            nacos.scheduler.shutdown()
-        except Exception as e:
-            logger.error(f"Nacos服务注销异常: {e}")
+    try:
+        nacos.stop_scheduler()  # 这会同时处理注销服务
+    except Exception as e:
+        logger.error(f"Nacos服务停止异常: {e}")
 
 
 def init_app():
