@@ -104,8 +104,13 @@ app = init_app()
 
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, e: Exception):
-    logger.error(e)
+    logger.error(f"请求路径: {request.url}\n请求方法: {request.method}\n错误信息: {str(e)}")
     return JSONResponse(
         status_code=http.HTTPStatus.INTERNAL_SERVER_ERROR,
-        content={"message": str(e)},
+        content={
+            "message": "发生了一个内部错误，请稍后再试。",
+            "details": str(e),
+            "path": str(request.url),
+            "method": request.method
+        },
     )
