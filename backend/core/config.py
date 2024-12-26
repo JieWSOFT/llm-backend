@@ -85,5 +85,7 @@ class Settings(BaseSettings):
     NACOS_GROUPNAME: str = "DEFAULT_GROUP"
     NACOS_BEAT_INTERVAL: int = 30
 
+    ENABLE_NACOS: bool = True
+
 
 settings = Settings()

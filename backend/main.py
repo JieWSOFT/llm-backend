@@ -46,27 +46,37 @@ async def lifespanself(app: FastAPI):
         statement = select(LLMTemplate)
         templates = session.exec(statement).all()
         setTemplates(templates)
-    try:
-        nacos.register()
-        # 注册配置变更监控回调
-        nacos.add_conf_watcher("ai_model", nacos_group_name, on_config_change)
-        # 启动时，强制同步一次配置
-        data_stream = nacos.load_conf("ai_model", nacos_group_name)
-        load_config(data_stream)
-        # 启动心跳线程
-        scheduler = AsyncIOScheduler()
-        scheduler.add_job(nacos.beat_callback, "interval", seconds=beat_interval)
-        scheduler.start()
-    except Exception as e:
-        logger.error(f"nacos服务注册异常,异常：{e}使用默认配置")
+    
+    logger.info(f"nacos.is_enabled(): {nacos.is_enabled()}")
+    if settings.ENABLE_NACOS and nacos.is_enabled():
+        try:
+            logger.info("Nacos服务注册开始")
+            nacos.register()
+            # 注册配置变更监控回调
+            nacos.add_conf_watcher("ai_model", nacos_group_name, on_config_change)
+            # 启动时，强制同步一次配置
+            data_stream = nacos.load_conf("ai_model", nacos_group_name)
+            load_config(data_stream)
+            # 启动心跳线程
+            scheduler = AsyncIOScheduler()
+            scheduler.add_job(nacos.beat_callback, "interval", seconds=beat_interval)
+            scheduler.start()
+            logger.info("Nacos服务注册成功")
+        except Exception as e:
+            logger.error(f"Nacos服务注册异常: {e}")
+    else:
+        logger.info("Nacos服务未启用，使用默认配置")
         
     yield
     
     # 结束停止的时候
-    try:
-        nacos.unregister()
-    except Exception as e:
-        logger.error(f"nacos服务注销异常,异常：{e}使用默认配置")
+    if settings.ENABLE_NACOS and nacos.is_enabled():
+        try:
+            nacos.unregister()
+            # 关闭 Nacos 的调度器
+            nacos.scheduler.shutdown()
+        except Exception as e:
+            logger.error(f"Nacos服务注销异常: {e}")
 
 
 def init_app():
